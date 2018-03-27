@@ -8,7 +8,7 @@ var app = {
   lastMessageId: 0,
   friends: {},
   messages: [],
-
+  
   init: function() {
     // Get username
     app.username = window.location.search.substr(10);
@@ -46,7 +46,6 @@ var app = {
       success: function (data) {
         // Clear messages input
         app.$message.val('');
-
         // Trigger a fetch to update the messages, pass true to animate
         app.fetch();
       },

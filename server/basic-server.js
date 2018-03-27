@@ -1,41 +1,38 @@
-/* Import node's http module: */
-var http = require('http');
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+const url = '/classes/messages';
+const cors = require('cors');
+const path = require('path');
+const dB = {
+  results: [{username: 'bob', text: 'hey', roomname: 'lobby', objectId: 1}]
+};
 
-var {requestHandler, defaultCorsHeaders} = require('./request-handler.js');
+let count = 2;
 
-// Every server needs to listen on a port with a unique number. The
-// standard port for HTTP servers is port 80, but that port is
-// normally already claimed by another server and/or not accessible
-// so we'll use a standard testing port like 3000, other common development
-// ports are 8080 and 1337.
-var port = 3000;
+app.use(cors());
 
-// For now, since you're running this server on your local machine,
-// we'll have it listen on the IP address 127.0.0.1, which is a
-// special address that always refers to localhost.
-var ip = '127.0.0.1';
+const pathToClient = path.join(__dirname, '../client/client');
+app.use(express.static(pathToClient));
 
+const pathToIndex = path.join(__dirname, '../client/client/index.html');
+app.get('/', (req, res) => res.sendFile(pathToIndex));
 
+app.use(bodyParser.urlencoded({ extended: false}));
 
-// We use node's http module to create a server.
-//
-// The function we pass to http.createServer will be used to handle all
-// incoming requests.
-//
-// After creating the server, we will tell it to listen on the given port and IP. */
-var server = http.createServer(requestHandler);
-console.log('Listening on http://' + ip + ':' + port);
-server.listen(port, ip);
+app.use(bodyParser.json());
 
-// To start this server, run:
-//
-//   node basic-server.js
-//
-// on the command line.
-//
-// To connect to the server, load http://127.0.0.1:3000 in your web
-// browser.
-//
-// server.listen() will continue running as long as there is the
-// possibility of serving more requests. To stop your server, hit
-// Ctrl-C on the command line.
+app.get('/', (req, res) => res.send('YO!'));
+
+app.get(url, (req, res) => {
+  res.json(dB);
+});
+
+app.post(url, (req, res) => {
+  console.log('here\'s our message object: ', req.body);
+  req.body.objectId = count++;
+  dB.results.push(req.body);
+  res.status(201).end('message posted!');
+});
+
+app.listen(3000, () => console.log('Currently listening on port 3000'));
